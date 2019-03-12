@@ -15,25 +15,25 @@ Dictionary 句式;
 
 inline wstring 四字()
 {
-	wstring output = 四字表[(size_t)floor(rand() % 四字表.size() + 1)];
+	wstring output = 四字表[(size_t)floor(rand() % 四字表.size())];
 	return output;
 }
 
 inline wstring 两字()
 {
-	wstring output = 两字表[(size_t)floor(rand() % 两字表.size() + 1)];
+	wstring output = 两字表[(size_t)floor(rand() % 两字表.size())];
 	return output;
 }
 
 wstring 句子()
 {
-	wstring output = 句式[(size_t)floor(rand() % 句式.size() + 1)];
+	wstring output = 句式[(size_t)floor(rand() % 句式.size())];
 	wregex aa(L"aa");
 	wregex bbbb(L"bbbb");
 	while(regex_search(output,aa))
 		output = regex_replace(output, aa, 两字(), std::regex_constants::format_first_only);
 	while(regex_search(output,bbbb))
-		output = regex_replace(output, aa, 两字(), std::regex_constants::format_first_only);
+		output = regex_replace(output, bbbb, 四字(), std::regex_constants::format_first_only);
 
 	return output;
 }
@@ -122,6 +122,7 @@ int wmain()
 		srand((unsigned int)time(nullptr));
 		for (int i = 0; i < count; i++)
 			wcout << 句子() << endl;
+		wcout << endl;
 	}	
 	system("pause");
 }
