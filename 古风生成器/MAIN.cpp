@@ -30,9 +30,9 @@ wstring 句子()
 	wstring output = 句式[(size_t)floor(rand() % 句式.size() + 1)];
 	wregex aa(L"aa");
 	wregex bbbb(L"bbbb");
-	while(regex_match(output,aa))
+	while(regex_search(output,aa))
 		output = regex_replace(output, aa, 两字(), std::regex_constants::format_first_only);
-	while(regex_match(output,bbbb))
+	while(regex_search(output,bbbb))
 		output = regex_replace(output, aa, 两字(), std::regex_constants::format_first_only);
 
 	return output;
@@ -43,28 +43,71 @@ int wmain()
 	locale chs("chs");
 	wcout.imbue(chs);
 	{
-		ifstream dict2(".\\两字.txt");
-		ifstream dict4(".\\四字.txt");
-		ifstream sentences(".\\句子.txt");
+		ifstream dict2(".\\两字.txt",ios::binary);
+		ifstream dict4(".\\四字.txt",ios::binary);
+		ifstream sentences(".\\句子.txt",ios::binary);
 		dict2.imbue(chs);
 		dict4.imbue(chs);
 		sentences.imbue(chs);
-		while (!sentences.eof())
+		while (true) 
 		{
-			wchar_t t[20] ={0};
-			sentences.get((char*)t, 20*2, L' ');
+			wchar_t t[30] = { 0 };
+			for (int i = 0; i < 30; i++)
+			{
+				sentences.read((char*)(t+i), 2);
+				if (t[i] == 0xFEFFUi16)
+				{
+					i--;
+					continue;
+				}
+				if (t[i] == 0x0020Ui16)
+				{
+					t[i] = 0x0000;
+					break;
+				}
+				if (sentences.eof())break;
+			}
 			句式.push_back(t);
+			if (sentences.eof())break;
 		}
 		while (!dict2.eof())
 		{
 			wchar_t t[3] = { 0 };
-			dict2.get((char*)t, 3*2);
+			for (int i = 0; i < 3; i++)
+			{
+				dict2.read((char*)(t + i), 2);
+				if (t[i] == 0xFEFFUi16)
+				{
+					i--;
+					continue;
+				}
+				if (t[i] == 0x0020Ui16)
+				{
+					t[i] = 0x0000;
+					break;
+				}
+				if (dict2.eof())break;
+			}
 			两字表.push_back(t);
 		}
 		while (!dict4.eof())
 		{
 			wchar_t t[5] = { 0 };
-			dict4.get((char*)t, 5*2);
+			for (int i = 0; i < 5; i++)
+			{
+				dict4.read((char*)(t + i), 2);
+				if (t[i] == 0xFEFFUi16)
+				{
+					i--;
+					continue;
+				}
+				if (t[i] == 0x0020Ui16)
+				{
+					t[i] = 0x0000;
+					break;
+				}
+				if (dict4.eof())break;
+			}
 			四字表.push_back(t);
 		}
 		dict2.close();
