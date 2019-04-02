@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include <iostream>
-#include <fstream>
+#include <cwchar>
+#include <cstdio>
 #include <regex>
 #include <string>
 #include <algorithm>
@@ -37,82 +38,35 @@ wstring 句子()
 
 	return output;
 }
-
+#if _WIN32
+template <unsigned int length>
+void read(Dictionary& D, FILE* f)
+{
+	while (!feof(f))
+	{
+		wchar_t temp[length+1] = { 0 };
+		fwscanf_s(f, L"%s",temp,length+1);
+		D.push_back(temp);
+	}
+}
+#endif
 int wmain()
 {
 	locale chs("chs");
 	wcout.imbue(chs);
 	{
-		ifstream dict2(".\\两字.txt",ios::binary);
-		ifstream dict4(".\\四字.txt",ios::binary);
-		ifstream sentences(".\\句子.txt",ios::binary);
-		dict2.imbue(chs);
-		dict4.imbue(chs);
-		sentences.imbue(chs);
-		while (true) 
-		{
-			wchar_t t[30] = { 0 };
-			for (int i = 0; i < 30; i++)
-			{
-				sentences.read((char*)(t+i), 2);
-				if (t[i] == 0xFEFFUi16)
-				{
-					i--;
-					continue;
-				}
-				if (t[i] == 0x0020Ui16)
-				{
-					t[i] = 0x0000;
-					break;
-				}
-				if (sentences.eof())break;
-			}
-			句式.push_back(t);
-			if (sentences.eof())break;
-		}
-		while (!dict2.eof())
-		{
-			wchar_t t[3] = { 0 };
-			for (int i = 0; i < 3; i++)
-			{
-				dict2.read((char*)(t + i), 2);
-				if (t[i] == 0xFEFFUi16)
-				{
-					i--;
-					continue;
-				}
-				if (t[i] == 0x0020Ui16)
-				{
-					t[i] = 0x0000;
-					break;
-				}
-				if (dict2.eof())break;
-			}
-			两字表.push_back(t);
-		}
-		while (!dict4.eof())
-		{
-			wchar_t t[5] = { 0 };
-			for (int i = 0; i < 5; i++)
-			{
-				dict4.read((char*)(t + i), 2);
-				if (t[i] == 0xFEFFUi16)
-				{
-					i--;
-					continue;
-				}
-				if (t[i] == 0x0020Ui16)
-				{
-					t[i] = 0x0000;
-					break;
-				}
-				if (dict4.eof())break;
-			}
-			四字表.push_back(t);
-		}
-		dict2.close();
-		dict4.close();
-		sentences.close();
+#if _WIN32
+		FILE* dict2 = nullptr;
+		FILE* dict4 = nullptr;
+		FILE* sentences = nullptr;
+		_wfopen_s(&dict2, L".\\两字.txt", L"rt,ccs=UNICODE");
+		_wfopen_s(&dict4, L".\\四字.txt", L"rt,ccs=UNICODE");
+		_wfopen_s(&sentences, L".\\句子.txt", L"rt,ccs=UNICODE");
+		read<2>(两字表, dict2);
+		read<4>(四字表, dict4);
+		read<25>(句式, sentences);
+		_fcloseall();
+#endif // WINDOWS
 	}
 	while (true)
 	{
@@ -124,5 +78,4 @@ int wmain()
 			wcout << 句子() << endl;
 		wcout << endl;
 	}	
-	system("pause");
 }
